@@ -7,12 +7,46 @@ module.exports = class User {
         this.email = email,
         this.password = password
     }
-    static getAllUser(res){
+    static getAllUser(res, next){
         try{
             db.query('SELECT * FROM user', function(err, results) {
                 if(err) throw err
                 return res.status(200).json({
                     stauts: true,
+                    data: results
+                })
+            })
+        }
+        catch(err){
+            return res.status(400).json({
+                status: false,
+                message: err.message
+            })
+        }
+    }
+    static getSingleUser(id, res, next) {
+        try{
+            db.query('SELECT * FROM user WHERE id = ?', [id], function(err, results) {
+                if(err) throw err
+                return res.status(200).json({
+                    status:true,
+                    data: results
+                })
+            })
+        }
+        catch(err){
+            return res.status(400).json({
+                status: false,
+                message: err.message
+            })
+        }
+    }
+    static getSingleUserWithUsername(username, res, next) {
+        try{
+            db.query('SELECT * FROM user WHERE username = ?', [username], (err, results) => {
+                if(err) throw err
+                return res.status(200).json({
+                    status:true,
                     data: results
                 })
             })
@@ -24,7 +58,7 @@ module.exports = class User {
             })
         }
     }
-    async createUser(res){
+    async createUser(res, next){
         try{
             const hashedPassword = await bcrypt.hash(this.password, 10)
             let sql = 'INSERT INTO user (username, email, password) VALUES (?)'
@@ -32,11 +66,7 @@ module.exports = class User {
                 if(err) throw err;
                 return res.status(200).json({
                     status: true,
-                    data: {
-                        username: this.username,
-                        email: this.email,
-                        password: hashedPassword
-                    }
+                    data: result
                 })
             })
         }

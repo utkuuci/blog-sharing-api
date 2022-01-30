@@ -24,4 +24,8 @@ app.use('/api/v1/blog', blogRoute)
 app.use('/api/v1/user', userRoute)
 
 
+// Error handling
+// app.use()
+
+
 app.listen(process.env.PORT, () => console.log(`Server is running on port ${process.env.PORT}`))
