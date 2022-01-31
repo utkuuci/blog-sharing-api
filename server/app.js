@@ -25,7 +25,7 @@ app.use('/api/v1/user', userRoute)
 
 
 // Error handling
-// app.use()
+app.use(require('./middleware/error'))
 
 
 app.listen(process.env.PORT, () => console.log(`Server is running on port ${process.env.PORT}`))
