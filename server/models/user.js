@@ -1,113 +1,101 @@
 const db = require('../config/db')
-const bcrypt = require('bcryptjs')
-const ErrorHandler = require('./error')
-module.exports = class User {
-    constructor(username, email, password){ 
-        this.username = username
-        this.email = email,
-        this.password = password
-    }
-    static getAllUser(res, next){
-        try{
-            db.query('SELECT * FROM user', function(err, results) {
-                if(err) throw err
-                if(!results.length) return next(new ErrorHandler('There is no user', 404))
-                return res.status(200).json({
-                    stauts: true,
-                    data: results
-                })
-            })
-        }
-        catch(err){
-            return next(err.message, 500)
-        }
-    }
-    static getSingleUser(username, res, next) {
-        try{
-            db.query('SELECT * FROM user WHERE username = ?', [username], function(err, results) {
-                
-                if(err) throw err
-                if(!results.length) {
-                    return next(new ErrorHandler("User couldn't found", 404))
-                }
-                else {
-                    return res.status(200).json({
-                        status:true,
-                        data: results
-                    })
-                }
-            })
-        }
-        catch(err){
-            return next(new ErrorHandler(err.message, 400))
-        }
-    }
-    static changeUser(username, data, res, next) {
-        try{
-            db.query('SELECT * FROM user WHERE username = ?', [username], function(err, result) {
-                if(err) throw err
-                if(!result.length){
-                    return next(new ErrorHandler("User couldn't found", 404))
-                }
-                else {
-                    const oldData = result[0]
-                    if(data.password) return next(new ErrorHandler("You can't change password for now", 400))
-                    oldData.email = data.email ? data.email : oldData.email
-                    oldData.username = data.username ? data.username : oldData.username
-                    db.query('UPDATE user SET username = ?, email = ? WHERE username = ?', [oldData.username, oldData.email, username], function(err, result) {
-                        if(err) throw err
-                        return res.status(200).json({
-                            status: true,
-                            data: oldData
-                        })
 
+class User {
+    static getUsers(res, next){
+        try{
+            db.query('SELECT * FROM user', function(err, result) {
+                if(err) return next()
+                if(!result.length) return res.status(400).json({ status: false, message: "There is no user" })
+                return res.status(200).json({
+                    status: true,
+                    count: result.length,
+                    data: result
+                })
+            })
+        }
+        catch(err){
+            return next()
+        }
+    }
+    static getSingleUser(id, res, next){
+        try{
+            db.query("SELECT * FROM user WHERE id = ?", [id], function(err, result){
+                if(err) return next()
+                if(!result.length) return res.status(404).json({status: false, message: `User not found with that id ${id}`})
+                return res.status(200).json({
+                    status: true,
+                    data: result[0]
+                })
+            })
+        }
+        catch(err){
+            return next()
+        }
+    }
+    static createUser(data, res, next){
+        try{
+            if(!data.username || !data.email || !data.password) return res.status(400).json({status: false, message: 'Please fill all blanks'})
+            db.query('SELECT * FROM user WHERE username = ? OR email = ?', [data.username, data.email], function(err, result) {
+                if(err) return next()
+                if(result.length > 0) return res.status(400).json({ status: false, message: "The User exist" })
+                db.query('INSERT INTO user (username, email, password) VALUES (?, ?, ?)',[data.username, data.email, data.password], function(err, result){
+                    if(err) return next()
+                    return res.status(200).json({
+                        status: true,
+                        message: "User created"
+                    })
+                })
+            })
+        }
+        catch(err){
+            return next()
+        }
+    }
+    static changeUser(id, data, res, next){
+        try{
+            if(data.password){
+                return res.status(400).json({
+                    status: false,
+                    message: "You can't change password for now"
+                })
+            }
+            db.query('SELECT * FROM user WHERE id = ?', [id], function(err, result) {
+                if(err) next()
+                if(!result.length) return res.status(400).json({ status: false, message: `User not found with that id ${id}` })
+                const newEmail = data.email ? data.email : result[0].email
+                const newUsername = data.username ? data.username : result[0].username
+                db.query('UPDATE user SET email = ?, username = ? WHERE id = ?', [newEmail, newUsername, id], function(err, result){
+                    if(err) return next()
+                    return res.status(200).json({
+                        status: true,
+                        message: "Updated"
+                    })
+                })
+            })
+        }
+        catch(err){
+            return next()
+        }
+    }
+    static deleteUser(id, res, next){
+        try{
+            db.query('SELECT * FROM user WHERE id = ?', [id], function(err, result) {
+                if(err) next()
+                if(!result.length) {
+                    return res.status(400).json({
+                        status: false,
+                        message: `User not found with that id ${id}`
                     })
                 }
-            })
-            
-        }
-        catch(err){
-            return next(new ErrorHandler(err.message, 500))
-        }
-    }
-    static deleteUser(username, res, next) {
-        try{
-            db.query('SELECT * FROM user WHERE username = ?', [username], function(err, result){
-                if(err) throw err
-                if(!result.length) return next(new ErrorHandler("User couldn't found", 404))
-            })
-            db.query('DELETE FROM user WHERE username = ?', [username], function(err, result) {
-                if(err) throw err
-                return res.status(200).json({
-                    status: true,
-                    data: result
-                })
+                db.query('DELETE FROM user WHERE id = ?', [id], function(err, result){
+                    if(err) next()
+                    return res.status(200).json({ status: true, message: 'User deleted' })
+                }) 
             })
         }
-        catch(err){
-            return next(new ErrorHandler(err.message, 500))
-        }
-    }
-    async createUser(res, next){
-        try{
-            if(!this.email || !this.username || !this.password){
-                return next(new ErrorHandler("Please fill all the blanks", 400))
-            }
-            const hashedPassword = await bcrypt.hash(this.password, 10)
-            let sql = 'INSERT INTO user (username, email, password) VALUES (?)'
-            db.query(sql, [[this.username, this.email, hashedPassword]], function(err, result){
-                if(err) throw err;
-                return res.status(200).json({
-                    status: true,
-                    data: result
-                })
-            })
-        }
-        catch(err){
-            res.status(400).json({
-                status: false,
-                message: err.message
-            })
+        catch(err) { 
+            return next() 
         }
     }
 }
+module.exports = User

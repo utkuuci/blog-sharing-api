@@ -1,37 +1,31 @@
 const User = require("../models/user")
-
-
 // @route       GET /api/v1/user
-// @desc        That controller gets all blogs from the database 
+// @desc        That controller gets all users from the database 
 // Public
-exports.getUsers = (req, res, next) => {
-    User.getAllUser(res, next)
+exports.getAllUsers = (req, res, next) => {
+    User.getUsers(res, next)
 }
-// @route       GET /api/v1/user/:username
-// @desc        That controller gets user with username from the database 
-// Public
-exports.getSingleUserByUsername = (req, res, next) => {
-    User.getSingleUser(req.params.username, res, next)
+// @route       GET /api/v1/user/:id
+// @desc        That controller gets single user from the database 
+// Public       
+exports.getSingleUser = (req, res, next) => {
+    User.getSingleUser(req.params.id, res, next)
 }
 // @route       POST /api/v1/user
-// @desc        That controller creates the user
+// @desc        That controller posts a new user to the database 
 // Public
 exports.createUser = (req, res, next) => {
-    const { username, email, password } = req.body
-    const user = new User(username, email, password)
-    user.createUser(res, next)
+    User.createUser(req.body, res, next)
 }
-// @route       PUT /api/v1/blog/:username
-// @desc        That controller updates the user 
+// @route       PUT /api/v1/user/:id
+// @desc        That controller cahnges user information from the database 
 // Private
 exports.changeUser = (req, res, next) => {
-    const data = req.body
-    User.changeUser(req.params.username, data, res, next)
+    User.changeUser(req.params.id, req.body, res, next)
 }
-
-// @route       DELETE /api/v1/blog/:username
-// @desc        That controller deletes the user
-// Private      JUST FOR ADMIN ROLE
+// @route       DELETE /api/v1/user/:id
+// @desc        That controller deletes user from the database 
+// Private      Just for admin role
 exports.deleteUser = (req, res, next) => {
-    User.deleteUser(req.params.username, res, next)
+    User.deleteUser(req.params.id, res, next)
 }

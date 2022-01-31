@@ -1,17 +1,20 @@
 const express = require('express')
-const { getBlogs, createBlog, getSingleBlogById, changeBlog, deleteBlog } = require('../controllers/blog')
-const router = express.Router()
+const { getSingleBlog, getAllBlogs, createBlog, deleteBlog, changeBlog } = require('../controllers/blog')
 
+const router = express.Router()
 
 router
     .route('/')
-    .get(getBlogs)
+    .get(getAllBlogs)
     .post(createBlog)
 
 router
     .route('/:id')
-    .get(getSingleBlogById)
+    .get(getSingleBlog)
     .put(changeBlog)
     .delete(deleteBlog)
 
+router.use((req, res, next) => {
+    res.status(404).json({ status: false, message: 'Page not found' })
+})
 module.exports = router

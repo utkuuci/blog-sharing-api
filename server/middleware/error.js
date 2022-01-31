@@ -1,6 +1,6 @@
 module.exports = (err, req, res, next) => {
-    const status = err.statuscode ? err.statusCode : 500
-    return res.status(status).json({
+    console.log(err.code)
+    res.status(500).json({
         status: false,
         message: err.message
     })

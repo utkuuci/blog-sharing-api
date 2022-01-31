@@ -1,32 +1,34 @@
 const express = require('express')
-const dotenv = require('dotenv')
-const cookieParser = require('cookie-parser')
+const dotenv = require("dotenv")
 const morgan = require('morgan')
-const helmet = require('helmet')
-dotenv.config({ path: './config/.env' })
+const { default: helmet } = require('helmet')
+dotenv.config({ path: "./config/.env" })
 
-// Get database
+// Get db and connect Database
 const db = require('./config/db')
-db.connect(err => err ? console.log(err.message) : console.log('Connected Database'))
+db.connect(err => err ? console.log(err.message) : console.log("Connected to Database"))
 
-// Get routes
-const blogRoute = require('./routes/blog')
-const userRoute = require('./routes/user')
+
+// Routes
+const userRoute = require("./routes/user")
+const blogRoute = require("./routes/blog")
+
+// Get Middleware
+const errorMiddleware = require('./middleware/error')
 
 
 const app = express()
 app.use(express.json())
-app.use(helmet())
-app.use(cookieParser())
+
+// Middlware
 app.use(morgan('dev'))
+app.use(helmet())
 
-// routes
-app.use('/api/v1/blog', blogRoute)
+// Routes
 app.use('/api/v1/user', userRoute)
+app.use('/api/v1/blog', blogRoute)
 
+// Error middleware
+app.use(errorMiddleware)
 
-// Error handling
-app.use(require('./middleware/error'))
-
-
-app.listen(process.env.PORT, () => console.log(`Server is running on port ${process.env.PORT}`))
+app.listen(process.env.PORT, () => console.log("Server is running on 3000 portbrew install port"))
