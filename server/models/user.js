@@ -1,5 +1,5 @@
 const db = require('../config/db')
-
+const bcrypt = require('bcryptjs')
 class User {
     static getUsers(res, next){
         try{
@@ -35,10 +35,11 @@ class User {
     static createUser(data, res, next){
         try{
             if(!data.username || !data.email || !data.password) return res.status(400).json({status: false, message: 'Please fill all blanks'})
-            db.query('SELECT * FROM user WHERE username = ? OR email = ?', [data.username, data.email], function(err, result) {
+            db.query('SELECT * FROM user WHERE username = ? OR email = ?', [data.username, data.email], async function(err, result) {
                 if(err) return next()
                 if(result.length > 0) return res.status(400).json({ status: false, message: "The User exist" })
-                db.query('INSERT INTO user (username, email, password) VALUES (?, ?, ?)',[data.username, data.email, data.password], function(err, result){
+                const hashedPassword = await bcrypt.hash(data.password, 10)
+                db.query('INSERT INTO user (username, email, password) VALUES (?, ?, ?)',[data.username, data.email, hashedPassword], function(err, result){
                     if(err) return next()
                     return res.status(200).json({
                         status: true,
