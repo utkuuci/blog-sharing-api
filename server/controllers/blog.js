@@ -1,14 +1,11 @@
-// const db = require('../config/db')
+const Blog = require('../models/blog')
 
 
 // @route       GET /api/v1/blog
 // @desc        That controller gets all blogs from the database 
 // Public
 exports.getBlogs = (req, res, next) => {
-    return res.status(200).json({
-        status: true,
-        message: "Testing Blog Route"
-    })
+    Blog.getAllBlogs(res, next)
 }
 // @route       GET /api/v1/blog/:id
 // @desc        That controller gets single blog with id from the database 

@@ -1,5 +1,3 @@
-// const db = require('../config/db')
-
 const User = require("../models/user")
 
 
@@ -12,15 +10,8 @@ exports.getUsers = (req, res, next) => {
 // @route       GET /api/v1/user/:id
 // @desc        That controller gets user with id from the database 
 // Public
-exports.getSingleUserById = (req, res, next) => {
-    User.getSingleUser(req.params.id, res, next)
-}
-// @route       GET /api/v1/user/:user
-// @desc        That controller gets user with username from the database 
-// Public
 exports.getSingleUserByUsername = (req, res, next) => {
-    const username = req.params.user
-    User.getSingleUserWithUsername(username, res, next)
+    User.getSingleUser(req.params.username, res, next)
 }
 // @route       POST /api/v1/user
 // @desc        That controller creates the user

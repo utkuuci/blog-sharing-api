@@ -24,9 +24,9 @@ module.exports = class User {
             })
         }
     }
-    static getSingleUser(id, res, next) {
+    static getSingleUser(username, res, next) {
         try{
-            db.query('SELECT * FROM user WHERE id = ?', [id], function(err, results) {
+            db.query('SELECT * FROM user WHERE username = ?', [username], function(err, results) {
                 if(err) throw err
                 return res.status(200).json({
                     status:true,
@@ -36,23 +36,6 @@ module.exports = class User {
         }
         catch(err){
             return res.status(400).json({
-                status: false,
-                message: err.message
-            })
-        }
-    }
-    static getSingleUserWithUsername(username, res, next) {
-        try{
-            db.query('SELECT * FROM user WHERE username = ?', [username], (err, results) => {
-                if(err) throw err
-                return res.status(200).json({
-                    status:true,
-                    data: results
-                })
-            })
-        }
-        catch(err){
-            res.status(400).json({
                 status: false,
                 message: err.message
             })
