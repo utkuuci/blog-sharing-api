@@ -20,6 +20,7 @@ app.use(helmet())
 app.use(cookieParser())
 app.use(morgan('dev'))
 
+// routes
 app.use('/api/v1/blog', blogRoute)
 app.use('/api/v1/user', userRoute)
 

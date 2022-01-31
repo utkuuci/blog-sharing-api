@@ -1,4 +1,5 @@
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 
 // @route       GET /api/v1/blog
@@ -11,33 +12,28 @@ exports.getBlogs = (req, res, next) => {
 // @desc        That controller gets single blog with id from the database 
 // Public
 exports.getSingleBlogById = (req, res, next) => {
-    Blog.getSingleBlog(id, res, next)
+    Blog.getSingleBlog(req.params.id, res, next)
 }
 // @route       POST /api/v1/blog
 // @desc        That controller posts the blog
 // Private
 exports.createBlog = (req, res, next) => {
     const { topic, blog, belongsTo } = req.body
-    const newBlog = new Blog(topic, blog, belongsTo)
-    newBlog.createBlog()
-
+    if(!topic || !blog || !belongsTo){
+        return next(new ErrorHandler("Please fill all the blanks", 400))
+    }
+    Blog.createBlog(res, req.body, next)
 }
 // @route       PUT /api/v1/blog/:id
 // @desc        That controller updates the blog 
 // Private
 exports.changeBlog = (req, res, next) => {
-    return res.status(201).json({
-        status: true,
-        message: 'Updating blog'
-    })
+    Blog.changeBlog(req.params.id, req.body, res, next)
 }
 
 // @route       DELETE /api/v1/blog/:id
 // @desc        That controller deletes the blog
 // Private
 exports.deleteBlog = (req, res, next) => {
-    return res.status(201).json({
-        status: true,
-        message: 'Deleting blog'
-    })
+    Blog.deleteBlog(req.params.id, res, next)
 }

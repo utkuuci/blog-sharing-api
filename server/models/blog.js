@@ -28,7 +28,6 @@ module.exports = class Blog {
         try{
             db.query('SELECT * FROM blog WHERE id = ?', [id], function(err, result){
                 if(err) throw err
-                console.log(result)
                 if(!result.length) return next(new ErrorHandler("Blog couldn't found"), 404)
                 return res.status(200).json({
                     status: true,
@@ -42,14 +41,14 @@ module.exports = class Blog {
     }
     static changeBlog(id, data, res, next) {
         try{
-            db.query('SELECT * FROM user WHERE id = ?', [id], function(err, result) {
-                if(err) throw err
+            db.query('SELECT * FROM blog WHERE id = ?', [id], function(err, result) {
+                if(err) next(err.message, 500)
                 if(!result.length) return next(new ErrorHandler("Blog couldn't found", 404))
                 if(data.belongsTo || data.createdAt || data.likes || data.unlikes) return next(new ErrorHandler("You can't change the blog that way", 400))
                 result[0].topic = data.topic ? data.topic : result[0].topic
                 result[0].blog = data.blog ? data.blog : result[0].blog
                 db.query('UPDATE blog SET blog = ?, topic = ? WHERE id = ?', [result[0].blog, result[0].topic, id], function(err, result) {
-                    if(err) throw err
+                    if(err) next(err.message, 500)
                     return res.status(200).json({
                         status: true,
                         message: 'Blog updated'
@@ -65,14 +64,14 @@ module.exports = class Blog {
     static deleteBlog(id, res, next) {  
         try {
             db.query('SELECT * FROM blog WHERE id = ?', [id], function(err, result){
-                if(err) throw err
+                if(err) return next(err.message, 500)
                 if(!result.length) return next(new ErrorHandler("Blog couldn't found", 404))
-            })
-            db.query('DELETE FROM blog WHERE id = ?', [id], function(err, result) {
-                if(err) throw err
-                return res.status(200).json({
-                    status: true,
-                    data: result
+                db.query('DELETE FROM blog WHERE id = ?', [id], function(err, result) {
+                    if(err) next(err.message, 500)
+                    return res.status(200).json({
+                        status: true,
+                        data: result
+                    })
                 })
             })
         }
@@ -80,24 +79,18 @@ module.exports = class Blog {
             return next(new ErrorHandler(err.message, 500))
         }
     }
-    createBlog(res, next){
+    static createBlog(res, data, next){
         try{
-            if(!this.topic || !this.blog || !this.username){
-                return next(new ErrorHandler("Please fill all the blanks", 400))
-            }
-            const data = [this.topic, this.blog, this.username]
-            db.query('SELECT * FROM user WHERE username = ?', [this.username], function(err, result) {
-                if(err) throw err
+            let newData = [data.topic, data.blog, data.belongsTo]
+            db.query('SELECT * FROM user WHERE username = ?', [data.belongsTo], function(err, result) {
+                if(err) return next(err.message, 500)
                 if(!result.length) return next(new ErrorHandler("Couldn't find user", 400))
-                else {
-                    db.query('INSERT INTO blog (topic, blog, belongsTo) VALUES (?)', [data], function(err, result){
-                        if(err) throw err
-                        return res.status(201).json({
-                            status: true,
-                            data
-                        })
+                db.query('INSERT INTO blog (topic, blog, belongsTo) VALUES (?)', [newData], function(err, result){
+                    if(err) return next(err.message, 500)
+                    return res.status(200).json({
+                        status: true
                     })
-                }
+                })
             }) 
         }
         catch(err){
