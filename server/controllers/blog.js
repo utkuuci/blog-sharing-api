@@ -11,19 +11,16 @@ exports.getBlogs = (req, res, next) => {
 // @desc        That controller gets single blog with id from the database 
 // Public
 exports.getSingleBlogById = (req, res, next) => {
-    return res.status(200).json({
-        status: true,
-        message: "Testing Blog Route"
-    })
+    Blog.getSingleBlog(id, res, next)
 }
 // @route       POST /api/v1/blog
 // @desc        That controller posts the blog
 // Private
 exports.createBlog = (req, res, next) => {
-    return res.status(201).json({
-        status: true,
-        message: 'Posting blog'
-    })
+    const { topic, blog, belongsTo } = req.body
+    const newBlog = new Blog(topic, blog, belongsTo)
+    newBlog.createBlog()
+
 }
 // @route       PUT /api/v1/blog/:id
 // @desc        That controller updates the blog 

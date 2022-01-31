@@ -11,6 +11,7 @@ module.exports = class User {
         try{
             db.query('SELECT * FROM user', function(err, results) {
                 if(err) throw err
+                if(!results.length) return next(new ErrorHandler('There is no user', 404))
                 return res.status(200).json({
                     stauts: true,
                     data: results
@@ -18,20 +19,16 @@ module.exports = class User {
             })
         }
         catch(err){
-            return res.status(400).json({
-                status: false,
-                message: err.message
-            })
+            return next(err.message, 500)
         }
     }
     static getSingleUser(username, res, next) {
         try{
-            let userData
             db.query('SELECT * FROM user WHERE username = ?', [username], function(err, results) {
                 
                 if(err) throw err
                 if(!results.length) {
-                    return next(new ErrorHandler("User couldn't find", 404))
+                    return next(new ErrorHandler("User couldn't found", 404))
                 }
                 else {
                     return res.status(200).json({
@@ -42,7 +39,7 @@ module.exports = class User {
             })
         }
         catch(err){
-            next(new ErrorHandler(err.message, 400))
+            return next(new ErrorHandler(err.message, 400))
         }
     }
     static changeUser(username, data, res, next) {
@@ -50,7 +47,7 @@ module.exports = class User {
             db.query('SELECT * FROM user WHERE username = ?', [username], function(err, result) {
                 if(err) throw err
                 if(!result.length){
-                    return next(new ErrorHandler("User couldn't find", 404))
+                    return next(new ErrorHandler("User couldn't found", 404))
                 }
                 else {
                     const oldData = result[0]
@@ -75,6 +72,10 @@ module.exports = class User {
     }
     static deleteUser(username, res, next) {
         try{
+            db.query('SELECT * FROM user WHERE username = ?', [username], function(err, result){
+                if(err) throw err
+                if(!result.length) return next(new ErrorHandler("User couldn't found", 404))
+            })
             db.query('DELETE FROM user WHERE username = ?', [username], function(err, result) {
                 if(err) throw err
                 return res.status(200).json({
@@ -89,6 +90,9 @@ module.exports = class User {
     }
     async createUser(res, next){
         try{
+            if(!this.email || !this.username || !this.password){
+                return next(new ErrorHandler("Please fill all the blanks", 400))
+            }
             const hashedPassword = await bcrypt.hash(this.password, 10)
             let sql = 'INSERT INTO user (username, email, password) VALUES (?)'
             db.query(sql, [[this.username, this.email, hashedPassword]], function(err, result){
