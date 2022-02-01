@@ -1,5 +1,6 @@
 const db = require('../config/db')
 const bcrypt = require('bcryptjs')
+const { sign } = require('jsonwebtoken')
 class User {
     static getUsers(res, next){
         try{
@@ -96,6 +97,41 @@ class User {
         }
         catch(err) { 
             return next() 
+        }
+    }
+    static checkInformation(data, res, next){
+        try{
+            db.query('SELECT * FROM user WHERE username = ?', [data.username], async function(err, result) {
+                if(err) next()
+                if(result.length == 0) {
+                    return res.status(404).json({
+                        status: true,
+                        message: "Username not found"
+                    })
+                }
+                const isValid = await bcrypt.compare(data.password, result[0].password)
+                if(isValid){
+                    const accessToken = sign({username: data.username, id: result.id}, process.env.JWT_SECRET)
+                    const option = {
+                        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
+                        httpOnly: true                        
+                    }
+                    return res.status(200).cookie('token', accessToken, option).json({
+                        status:true,
+                        message: "You logged in",
+                        token: accessToken
+                    })
+                }
+                else{
+                    res.status(400).json({
+                        status: false,
+                        message: "Password is wrong"
+                    })
+                }
+            })
+        }
+        catch(err){
+            next()
         }
     }
 }

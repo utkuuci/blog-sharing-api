@@ -2,6 +2,7 @@ const express = require('express')
 const dotenv = require("dotenv")
 const morgan = require('morgan')
 const { default: helmet } = require('helmet')
+const cookieParser = require('cookie-parser')
 dotenv.config({ path: "./config/.env" })
 
 // Get db and connect Database
@@ -12,6 +13,7 @@ db.connect(err => err ? console.log(err.message) : console.log("Connected to Dat
 // Routes
 const userRoute = require("./routes/user")
 const blogRoute = require("./routes/blog")
+const authRoute = require('./routes/auth')
 
 // Get Middleware
 const errorMiddleware = require('./middleware/error')
@@ -20,6 +22,9 @@ const errorMiddleware = require('./middleware/error')
 const app = express()
 app.use(express.json())
 
+// For cookie
+app.use(cookieParser())
+
 // Middlware
 app.use(morgan('dev'))
 app.use(helmet())
@@ -27,7 +32,7 @@ app.use(helmet())
 // Routes
 app.use('/api/v1/user', userRoute)
 app.use('/api/v1/blog', blogRoute)
-
+app.use('/api/v1/auth', authRoute)
 // Error middleware
 app.use(errorMiddleware)
 
