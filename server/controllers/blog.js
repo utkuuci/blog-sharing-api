@@ -15,17 +15,17 @@ exports.getSingleBlog = (req, res, next) => {
 // @desc        That controller posts a new blog to the database 
 // Public
 exports.createBlog = (req, res, next) => {
-    Blog.createBlog(req.body, res, next)
+    Blog.createBlog(req.body, req, res, next)
 }
 // @route       PUT /api/v1/blog/:id
 // @desc        That controller cahnges blog information from the database 
 // Private
 exports.changeBlog = (req, res, next) => {
-    Blog.changeBlog(req.params.id, req.body, res, next)
+    Blog.changeBlog(req.params.id, req.body, req, res, next)
 }
 // @route       DELETE /api/v1/blog/:id
 // @desc        That controller deletes blog from the database 
 // Private
 exports.deleteBlog = (req, res, next) => {
-    Blog.deleteBlog(req.params.id, res, next)
+    Blog.deleteBlog(req.params.id, req, res, next)
 }
