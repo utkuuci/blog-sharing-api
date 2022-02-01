@@ -111,7 +111,7 @@ class User {
                 }
                 const isValid = await bcrypt.compare(data.password, result[0].password)
                 if(isValid){
-                    const accessToken = sign({username: data.username, id: result.id}, process.env.JWT_SECRET)
+                    const accessToken = sign({username: data.username, id: result[0].id}, process.env.JWT_SECRET)
                     const option = {
                         expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
                         httpOnly: true                        
