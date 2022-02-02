@@ -141,11 +141,20 @@ class Blog {
     }
     static unlikeBlog(id, userId, res, next){
         try{
-            db.query('DELETE FROM like_blog WHERE user_id = ? AND blog_id = ?', [userId, id], function(){
+            db.query('SELECT * FROM like_blog WHERE user_id = ? AND blog_id = ?', [userId, id], function(err, result){
                 if(err) return next()
-                return res.status(200).json({
-                    status: true,
-                    message: 'deleted'
+                if(!result.length){
+                    return res.status(404).json({
+                        status: false,
+                        message: "Like couldn't found"
+                    })
+                }
+                db.query('DELETE FROM like_blog WHERE user_id = ? AND blog_id = ?', [userId, id], function(err, result){
+                    if(err) return next()
+                    return res.status(200).json({
+                        status: true,
+                        message: 'Like deleted'
+                    })
                 })
             })
         }
