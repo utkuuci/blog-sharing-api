@@ -1,6 +1,6 @@
 const express = require('express')
 const auth = require('../middleware/auth')
-const { getSingleBlog, getAllBlogs, createBlog, deleteBlog, changeBlog } = require('../controllers/blog')
+const { getSingleBlog, getAllBlogs, createBlog, deleteBlog, changeBlog, likeBlog, deleteLikeBlog } = require('../controllers/blog')
 
 const router = express.Router()
 
@@ -15,7 +15,9 @@ router
     .put(auth, changeBlog)
     .delete(auth, deleteBlog)
 
-router.use((req, res, next) => {
-    res.status(404).json({ status: false, message: 'Page not found' })
-})
+router
+    .route('/:id/like')
+    .post(auth, likeBlog)
+    .delete(auth, deleteLikeBlog)
+
 module.exports = router

@@ -106,5 +106,52 @@ class Blog {
             return next() 
         }
     }
+    static likeBlog(id, userId, res, next){
+        console.log(userId)
+        try{
+            db.query('SELECT * FROM blog WHERE id = ?', [id], function(err, result) {
+                if(err) return next()
+                if(!result.length) {
+                    return res.status(404).json({
+                        status: false,
+                        message: "Blog couldn't found"
+                    })
+                }
+                db.query('SELECT user_id, blog_id FROM like_blog WHERE user_id = ? AND blog_id = ?', [userId, id], function(err, result){
+                    if(err) return next()
+                    
+                    if(!result.length){
+                        db.query('INSERT INTO like_blog (user_id, blog_id) VALUES (?, ?)', [userId, id], function(err, result){
+                            if(err) return next()
+                            return res.status(200).json({
+                                status: true,
+                                message: "Blog liked"
+                            })
+                        })
+                    }
+                    else {
+                        return next()
+                    }
+                })
+            })
+        }
+        catch(err){
+            return next()
+        }
+    }
+    static unlikeBlog(id, userId, res, next){
+        try{
+            db.query('DELETE FROM like_blog WHERE user_id = ? AND blog_id = ?', [userId, id], function(){
+                if(err) return next()
+                return res.status(200).json({
+                    status: true,
+                    message: 'deleted'
+                })
+            })
+        }
+        catch(err){
+            return next()
+        }
+    }
 }
 module.exports = Blog

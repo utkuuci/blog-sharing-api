@@ -29,3 +29,16 @@ exports.changeUser = (req, res, next) => {
 exports.deleteUser = (req, res, next) => {
     User.deleteUser(req.params.id, res, next)
 }
+
+// @route       POST /api/v1/user/:id/follow
+// @desc        That controller follows user
+// Private
+exports.followUser = (req, res, next) => {
+    
+}
+// @route       DELETE /api/v1/user/:id/unfollow
+// @desc        That controller unfollows user
+// Private      
+exports.unfollowUser = (req, res, next) => {
+    
+}

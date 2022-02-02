@@ -29,3 +29,18 @@ exports.changeBlog = (req, res, next) => {
 exports.deleteBlog = (req, res, next) => {
     Blog.deleteBlog(req.params.id, req, res, next)
 }
+
+// @route       POST /api/v1/blog/:id/like
+// @desc        That controller likes blog by user
+// Private
+exports.likeBlog = (req, res, next) => {
+    Blog.likeBlog(req.params.id, req.user.id, res, next)
+}
+
+// @route       DELETE /api/v1/blog/:id/delete/like
+// @desc        That controller delete like blog by user
+// Private
+exports.deleteLikeBlog = (req, res, next) => {
+    Blog.unlikeBlog(req.params.id, req.user.id, res, next)
+}
+

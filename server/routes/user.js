@@ -1,6 +1,6 @@
 const express = require('express')
-const { getAllUsers, getSingleUser, createUser, changeUser, deleteUser } = require('../controllers/user')
-
+const { getAllUsers, getSingleUser, createUser, changeUser, deleteUser, followUser, unfollowUser } = require('../controllers/user')
+const auth = require('../middleware/auth')
 const router = express.Router()
 
 router
@@ -11,10 +11,9 @@ router
 router
     .route('/:id')
     .get(getSingleUser)
-    .put(changeUser)
+    .put(auth, changeUser)
     .delete(deleteUser)
 
-router.use((req, res, next) => {
-    res.status(404).json({ status: false, message: 'Page not found' })
-})
+router.post('/:id/follow', auth, followUser)
+router.post('/:id/unfollow', auth, unfollowUser)
 module.exports = router
