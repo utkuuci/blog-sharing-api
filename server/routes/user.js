@@ -14,6 +14,8 @@ router
     .put(auth, changeUser)
     .delete(deleteUser)
 
-router.post('/:id/follow', auth, followUser)
-router.post('/:id/unfollow', auth, unfollowUser)
+router
+    .route('/:id/follow')
+    .post(auth, followUser)
+    .delete(auth, unfollowUser)
 module.exports = router

@@ -107,7 +107,6 @@ class Blog {
         }
     }
     static likeBlog(id, userId, res, next){
-        console.log(userId)
         try{
             db.query('SELECT * FROM blog WHERE id = ?', [id], function(err, result) {
                 if(err) return next()

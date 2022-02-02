@@ -134,5 +134,59 @@ class User {
             next()
         }
     }
+    static followUser(id, userId, res, next) {
+        try{
+            db.query('SELECT * FROM user WHERE id = ?', [id], function(err, result) {
+                if(err) return next()
+                if(!result.length) {
+                    return res.status(404).json({
+                        status: false,
+                        message: "User couldn't found"
+                    })
+                }
+                db.query('SELECT user_id, follow_id FROM follow_user WHERE user_id = ? AND follow_id = ?', [userId, id], function(err, result){
+                    if(err) return next()
+                    if(!result.length){
+                        db.query('INSERT INTO follow_user (user_id, follow_id) VALUES (?, ?)', [userId, id], function(err, result){
+                            if(err) return next()
+                            return res.status(200).json({
+                                status: true,
+                                message: "User followed"
+                            })
+                        })
+                    }
+                    else {
+                        return next()
+                    }
+                })
+            })
+        }
+        catch(err){
+            return next()
+        }
+    }
+    static unfollowUser(id, userId, res, next){
+        try{
+            db.query('SELECT * FROM follow_user WHERE user_id = ? AND follow_id = ?', [userId, id], function(err, result){
+                if(err) return next()
+                if(!result.length){
+                    return res.status(404).json({
+                        status: false,
+                        message: "Follow couldn't found"
+                    })
+                }
+                db.query('DELETE FROM follow_user WHERE user_id = ? AND follow_id = ?', [userId, id], function(err, result){
+                    if(err) return next()
+                    return res.status(200).json({
+                        status: true,
+                        message: 'Follow deleted'
+                    })
+                })
+            })
+        }
+        catch(err){
+            return next()
+        }
+    }
 }
 module.exports = User
