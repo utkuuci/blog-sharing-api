@@ -1,11 +1,12 @@
 const db = require('../config/db')
 const bcrypt = require('bcryptjs')
+const ErrorHandler = require("../helpers/error")
 const { sign } = require('jsonwebtoken')
 class User {
     static getUsers(res, next){
         try{
             db.query('SELECT * FROM user', function(err, result) {
-                if(err) return next()
+                if(err) return next(new ErrorHandler(err.message, 500))
                 if(!result.length) return res.status(400).json({ status: false, message: "There is no user" })
                 return res.status(200).json({
                     status: true,
@@ -15,13 +16,13 @@ class User {
             })
         }
         catch(err){
-            return next()
+            return next(new ErrorHandler(err.message, 500))
         }
     }
     static getSingleUser(id, res, next){
         try{
             db.query("SELECT * FROM user WHERE id = ?", [id], function(err, result){
-                if(err) return next()
+                if(err) return next(new ErrorHandler(err.message, 500))
                 if(!result.length) return res.status(404).json({status: false, message: `User not found with that id ${id}`})
                 return res.status(200).json({
                     status: true,
@@ -30,18 +31,18 @@ class User {
             })
         }
         catch(err){
-            return next()
+            return next(new ErrorHandler(err.message, 500))
         }
     }
     static createUser(data, res, next){
         try{
             if(!data.username || !data.email || !data.password) return res.status(400).json({status: false, message: 'Please fill all blanks'})
             db.query('SELECT * FROM user WHERE username = ? OR email = ?', [data.username, data.email], async function(err, result) {
-                if(err) return next()
+                if(err) return next(new ErrorHandler(err.message, 500))
                 if(result.length > 0) return res.status(400).json({ status: false, message: "The User exist" })
                 const hashedPassword = await bcrypt.hash(data.password, 10)
                 db.query('INSERT INTO user (username, email, password) VALUES (?, ?, ?)',[data.username, data.email, hashedPassword], function(err, result){
-                    if(err) return next()
+                    if(err) return next(new ErrorHandler(err.message, 500))
                     return res.status(200).json({
                         status: true,
                         message: "User created"
@@ -50,20 +51,14 @@ class User {
             })
         }
         catch(err){
-            return next()
+            return next(new ErrorHandler(err.message, 500))
         }
     }
     static changeUser(id, data, res, next){
         try{
-            if(data.password){
-                return res.status(400).json({
-                    status: false,
-                    message: "You can't change password for now"
-                })
-            }
             db.query('SELECT * FROM user WHERE id = ?', [id], function(err, result) {
-                if(err) next()
-                if(!result.length) return res.status(400).json({ status: false, message: `User not found with that id ${id}` })
+                if(err) return next(new ErrorHandler(err.message, 500))
+                if(!result.length) return next(new ErrorHandler(`User not found with that id ${id}`, 404))
                 const newEmail = data.email ? data.email : result[0].email
                 const newUsername = data.username ? data.username : result[0].username
                 db.query('UPDATE user SET email = ?, username = ? WHERE id = ?', [newEmail, newUsername, id], function(err, result){
@@ -76,13 +71,13 @@ class User {
             })
         }
         catch(err){
-            return next()
+            return next(new ErrorHandler(err.message, 500))
         }
     }
     static deleteUser(id, res, next){
         try{
             db.query('SELECT * FROM user WHERE id = ?', [id], function(err, result) {
-                if(err) next()
+                if(err) return next(new ErrorHandler(err.message, 500))
                 if(!result.length) {
                     return res.status(400).json({
                         status: false,
@@ -90,19 +85,19 @@ class User {
                     })
                 }
                 db.query('DELETE FROM user WHERE id = ?', [id], function(err, result){
-                    if(err) next()
+                    if(err) return next(new ErrorHandler(err.message, 500))
                     return res.status(200).json({ status: true, message: 'User deleted' })
                 }) 
             })
         }
         catch(err) { 
-            return next() 
+            return next(new ErrorHandler(err.message, 500))
         }
     }
     static checkInformation(data, res, next){
         try{
             db.query('SELECT * FROM user WHERE username = ?', [data.username], async function(err, result) {
-                if(err) next()
+                if(err) return next(new ErrorHandler(err.message, 500))
                 if(result.length == 0) {
                     return res.status(404).json({
                         status: true,
@@ -131,13 +126,13 @@ class User {
             })
         }
         catch(err){
-            next()
+            return next(new ErrorHandler(err.message, 500))
         }
     }
     static followUser(id, userId, res, next) {
         try{
             db.query('SELECT * FROM user WHERE id = ?', [id], function(err, result) {
-                if(err) return next()
+                if(err) return next(new ErrorHandler(err.message, 500))
                 if(!result.length) {
                     return res.status(404).json({
                         status: false,
@@ -145,10 +140,10 @@ class User {
                     })
                 }
                 db.query('SELECT user_id, follow_id FROM follow_user WHERE user_id = ? AND follow_id = ?', [userId, id], function(err, result){
-                    if(err) return next()
+                    if(err) return next(new ErrorHandler(err.message, 500))
                     if(!result.length){
                         db.query('INSERT INTO follow_user (user_id, follow_id) VALUES (?, ?)', [userId, id], function(err, result){
-                            if(err) return next()
+                            if(err) return next(new ErrorHandler(err.message, 500))
                             return res.status(200).json({
                                 status: true,
                                 message: "User followed"
@@ -156,19 +151,19 @@ class User {
                         })
                     }
                     else {
-                        return next()
+                        return next(new ErrorHandler(err.message, 500))
                     }
                 })
             })
         }
         catch(err){
-            return next()
+            return next(new ErrorHandler(err.message, 500))
         }
     }
     static unfollowUser(id, userId, res, next){
         try{
             db.query('SELECT * FROM follow_user WHERE user_id = ? AND follow_id = ?', [userId, id], function(err, result){
-                if(err) return next()
+                if(err) return next(new ErrorHandler(err.message, 500))
                 if(!result.length){
                     return res.status(404).json({
                         status: false,
@@ -185,7 +180,7 @@ class User {
             })
         }
         catch(err){
-            return next()
+            return next(new ErrorHandler(err.message, 500))
         }
     }
 }

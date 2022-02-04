@@ -1,4 +1,5 @@
 const User = require("../models/user")
+const ErrorHandler = require('../helpers/error')
 // @route       GET /api/v1/user
 // @desc        That controller gets all users from the database 
 // Public
@@ -21,6 +22,9 @@ exports.createUser = (req, res, next) => {
 // @desc        That controller cahnges user information from the database 
 // Private
 exports.changeUser = (req, res, next) => {
+    if(req.user.id != req.params.id){
+        return next(new ErrorHandler("You are not allowed to change user info fot other user", 400))
+    }
     User.changeUser(req.params.id, req.body, res, next)
 }
 // @route       DELETE /api/v1/user/:id
