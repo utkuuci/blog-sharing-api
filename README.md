@@ -1,4 +1,4 @@
-# BLOG SHARING SOCIAL MEDIA PROJECT (NOT COMPLETED)
+# BLOG SHARING SOCIAL MEDIA PROJECT
 
 - This app uses
   - Node JS
@@ -6,6 +6,8 @@
   - Express
   - JWT
   - Bcryptjs
+  - uuid
+  - Node Mailer
 
 Author: Muzaffer Tolga Yakar
 
