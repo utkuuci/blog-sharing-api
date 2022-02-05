@@ -1,7 +1,9 @@
-const db = require('../config/db')
 const bcrypt = require('bcryptjs')
-const ErrorHandler = require("../helpers/error")
 const { sign } = require('jsonwebtoken')
+const uuid = require('uuid')
+const db = require('../config/db')
+const ErrorHandler = require("../helpers/error")
+const eventEmitter = require('../events/eventEmitter')
 class User {
     static getUsers(res, next){
         try{
@@ -183,5 +185,37 @@ class User {
             return next(new ErrorHandler(err.message, 500))
         }
     }
+    static resetPassword(email, res, next){
+        try{
+            db.query('SELECT * FROM user WHERE email = ?', [email], async function(err, result){
+                if(err) return next(new ErrorHandler(err.message, 500))
+                if(!result.length){
+                    return res.status(404).json({
+                        status: false,
+                        message: "User couldn't found"
+                    })
+                }
+                const new_password = uuid.v4()?.split('-')[0] || `usr-${new Date().getTime()}`
+                eventEmitter.emit('send_email', {
+                    to: email,
+                    subject: "Resetting Password", 
+                    html: `Talebiniz uzerine sifre sifirlama isleminiz gerceklesmistir <br> Giris Yaptiktan sonra sifrenizi degistirmeyi unutmayin <br> Sifreniz: <b>${new_password}</b>`,
+                })
+                const hashedPassword = await bcrypt.hash(new_password, 10)
+                db.query('UPDATE user SET password = ? WHERE email = ?', [hashedPassword, email], function(err, result){
+                    if(err) return next()
+                    return res.status(200).json({
+                        message: "Email sent",
+                        password: new_password,
+                        hashedPassword
+                    })
+                })
+            })
+        }
+        catch(err){
+            return next(new ErrorHandler(err.message, 500))
+        }
+    }
+    
 }
 module.exports = User

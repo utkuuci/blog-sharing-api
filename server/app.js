@@ -4,12 +4,14 @@ const cors = require('cors')
 const morgan = require('morgan')
 const { default: helmet } = require('helmet')
 const cookieParser = require('cookie-parser')
+const eventFunc = require('./events')
 dotenv.config({ path: "./config/.env" })
 
 // Get db and connect Database
 const db = require('./config/db')
 db.connect(err => err ? console.log(err.message) : console.log("Connected to Database"))
 
+eventFunc()
 
 // Routes
 const userRoute = require("./routes/user")

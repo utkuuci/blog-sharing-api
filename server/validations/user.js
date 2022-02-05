@@ -16,3 +16,7 @@ exports.changeUserInfoValidation = Joi.object({
     username: Joi.string().min(3),
     password: Joi.string().min(8)
 })
+
+exports.resetPasswordValidation = Joi.object({
+    email: Joi.string().required().email().min(8),
+})

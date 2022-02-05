@@ -1,8 +1,8 @@
 const express = require('express')
-const { getAllUsers, getSingleUser, createUser, changeUser, deleteUser, followUser, unfollowUser } = require('../controllers/user')
+const { getAllUsers, getSingleUser, createUser, changeUser, deleteUser, followUser, unfollowUser, resetPassword } = require('../controllers/user')
 const validate = require('../middleware/validation')
 const auth = require('../middleware/auth')
-const { registerValidation, changeUserInfoValidation } = require('../validations/user')
+const { registerValidation, changeUserInfoValidation, resetPasswordValidation } = require('../validations/user')
 
 const router = express.Router()
 
@@ -21,4 +21,5 @@ router
     .route('/:id/follow')
     .post(auth, followUser)
     .delete(auth, unfollowUser)
+router.route('/reset-password').post(validate(resetPasswordValidation), resetPassword)
 module.exports = router

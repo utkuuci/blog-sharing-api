@@ -46,3 +46,7 @@ exports.followUser = (req, res, next) => {
 exports.unfollowUser = (req, res, next) => {
     User.unfollowUser(req.params.id, req.user.id, res, next)
 }
+
+exports.resetPassword = (req, res, next) => {
+    User.resetPassword(req.body.email, res, next)
+}
