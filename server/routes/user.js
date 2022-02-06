@@ -1,5 +1,5 @@
 const express = require('express')
-const { getAllUsers, getSingleUser, createUser, changeUser, deleteUser, followUser, unfollowUser, resetPassword } = require('../controllers/user')
+const { getAllUsers, getSingleUser, createUser, changeUser, deleteUser, followUser, unfollowUser, resetPassword, getUserBlog } = require('../controllers/user')
 const validate = require('../middleware/validation')
 const auth = require('../middleware/auth')
 const { registerValidation, changeUserInfoValidation, resetPasswordValidation } = require('../validations/user')
@@ -22,4 +22,5 @@ router
     .post(auth, followUser)
     .delete(auth, unfollowUser)
 router.route('/reset-password').post(validate(resetPasswordValidation), resetPassword)
+router.route('/:id/blogs').get(getUserBlog)
 module.exports = router

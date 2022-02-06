@@ -47,6 +47,15 @@ exports.unfollowUser = (req, res, next) => {
     User.unfollowUser(req.params.id, req.user.id, res, next)
 }
 
+// @route       DELETE /api/v1/user/reset-password
+// @desc        That controller sending email for the password
+// Public 
 exports.resetPassword = (req, res, next) => {
     User.resetPassword(req.body.email, res, next)
+}
+// @route       DELETE /api/v1/user/:id/blogs
+// @desc        That controller gets user's blogs
+// Public 
+exports.getUserBlog = (req, res, next) => {
+    User.getUserBlog(req.params.id, res, next)
 }

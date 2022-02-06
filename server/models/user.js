@@ -216,6 +216,31 @@ class User {
             return next(new ErrorHandler(err.message, 500))
         }
     }
+    static getUserBlog(userId, res, next){
+        db.query("SELECT * FROM user WHERE id = ?", [userId], function(err, result){
+            if(err) return next(new ErrorHandler(err.message, 500))
+            if(!result.length){
+                return res.status(404).json({
+                    status: false,
+                    message: "User couldn't found"
+                })
+            }
+            db.query("SELECT * FROM user INNER JOIN blog on user.username = blog.belongsTo WHERE user.id = ?", [userId], function(err, result){
+                if(err) return next(new ErrorHandler(err.message), 500)
+                if(!result.length){
+                    return res.status(400).json({
+                        status: false,
+                        message: "Couldn't found the user's blogs"
+                    })
+                }
+                return res.status(200).json({
+                    status: true,
+                    count: result.length,
+                    data: result
+                })
+            })
+        })
+    }
     
 }
 module.exports = User
