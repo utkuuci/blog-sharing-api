@@ -25,7 +25,7 @@ const errorMiddleware = require('./middleware/error')
 const app = express()
 app.use(express.json())
 
-
+const hello = "hello world";
 
 // Cors
 app.use(cors({
