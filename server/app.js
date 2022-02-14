@@ -26,6 +26,7 @@ const app = express()
 app.use(express.json())
 
 
+
 // Cors
 app.use(cors({
     origin: `http://localhost:${process.env.PORT}`
